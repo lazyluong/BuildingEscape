@@ -25,13 +25,20 @@ public:
 		
 	
 private:
-	UPROPERTY( VisibleAnywhere )
+	UPROPERTY( EditAnywhere )
 	float OpenAngle = 90.0f;
 
 	UPROPERTY( EditAnywhere )
 	ATriggerVolume* PressurePlate;
 
-	AActor* ActorThatOpens;
+	UPROPERTY( EditAnywhere )
+	float DoorCloseDelay = 1.0f;
+
+private:
+	AActor* Owner; // Owner of the door
+	AActor* ActorThatOpens; // Pawn that inherit AActor
+
+	float LastDoorOpenTime;
 
 private:
 	virtual void OpenDoor();

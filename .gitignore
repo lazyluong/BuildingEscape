@@ -19,5 +19,41 @@ Saved/
 #
 ################################################################################
 
+# Binary Files
+**/bin/
+
+# Object Files
+**/obj/
+
+# Debug Files
+**/debug/
+
+# Pre-compiled Header
+**/ipch/
+
+##########
+
+# Database File
 *.VC.db
+*.VC.VC.opendb
+
+# Code Browsing Database
+*.sdf
+
+# Per-user solution options
 *.suo
+
+# User file
+*.user
+
+# Pre-compiled Header
+*.pch
+
+# Non-compiled Browser (Intellisense Database)
+*.ncb
+
+# Local Symbols
+*.sbr
+
+# Log Files
+*.log
