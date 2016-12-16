@@ -15,15 +15,43 @@ UOpenDoor::UOpenDoor()
 }
 
 
+
 // Called when the game starts
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Find the player controller
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+}
+
+
+
+// Called every frame
+void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
+{
+	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+
+	// Poll the Trigger every frame
+	// If the ActorThatOpens is in the volume
+	if( PressurePlate->IsOverlappingActor( ActorThatOpens ) )
+	{
+		// Open the door
+		OpenDoor();
+	}
+	else
+	{
+		// Close the door
+		CloseDoor();
+	}
+}
+
+
+
+void UOpenDoor::OpenDoor()
+{
 	// Find the owning Actor
 	AActor* owner = GetOwner();
-
-	UE_LOG( LogTemp , Warning , TEXT( "Attempting to rotate %s." ) , *owner->GetName() );
 
 	// Create a rotator
 	FRotator rotator = FRotator( 0.0f , -75.0f , 0.0f );
@@ -32,12 +60,14 @@ void UOpenDoor::BeginPlay()
 	owner->SetActorRotation( rotator );
 }
 
-
-// Called every frame
-void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
+void UOpenDoor::CloseDoor()
 {
-	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+	// Find the owning Actor
+	AActor* owner = GetOwner();
 
-	// ...
+	// Create a rotator
+	FRotator rotator = FRotator( 0.0f , 0.0f , 0.0f );
+
+	// Set the door rotation
+	owner->SetActorRotation( rotator );
 }
-
