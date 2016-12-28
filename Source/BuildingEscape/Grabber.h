@@ -21,6 +21,29 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-		
-	
+private:
+	// How far ahead the player can reach in cm
+	UPROPERTY( EditAnywhere )
+	float Reach = 100.0f;
+
+	UPhysicsHandleComponent *PhysicsHandle = nullptr;
+
+	UInputComponent *InputComponent = nullptr;
+
+private:
+	// Find attached physics handle
+	void FindPhysicsHandleComponent();
+
+	// Setup attached input component
+	void SetupInputComponent();
+
+	// Return hit for first physics body in reach
+	const FHitResult GetFirstPhysicsBodyInReach();
+
+public:
+	// Ray-cast and grab what's in reach
+	void Grab();
+
+	// Called when grab is released
+	void Release();
 };
