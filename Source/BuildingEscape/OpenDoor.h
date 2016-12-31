@@ -32,10 +32,10 @@ private:
 	float DoorCloseDelay = 1.0f;
 
 	UPROPERTY( EditAnywhere )
-	ATriggerVolume* PressurePlate;
+	ATriggerVolume* PressurePlate = nullptr;
 
 private:
-	AActor* Owner; // Owner of the Door
+	AActor* Owner = nullptr; // Owner of the Door
 
 	float LastDoorOpentime;
 

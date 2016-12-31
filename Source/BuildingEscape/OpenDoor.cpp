@@ -23,6 +23,13 @@ void UOpenDoor::BeginPlay()
 
 	// Find the acting owner
 	Owner = GetOwner();
+
+	if( PressurePlate == nullptr )
+	{
+		UE_LOG( LogTemp , Warning , 
+			TEXT( "%s is missing a Pressure Plate." ),
+			Owner->GetName() );
+	}
 }
 
 
@@ -52,14 +59,20 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 
 void UOpenDoor::OpenDoor()
 {
-	// Set the door rotation
-	Owner->SetActorRotation( FRotator( 0.0f , OpenAngle , 0.0f ) );
+	if( Owner != nullptr )
+	{
+		// Set the door rotation
+		Owner->SetActorRotation( FRotator( 0.0f , OpenAngle , 0.0f ) );
+	}
 }
 
 void UOpenDoor::CloseDoor()
 {
-	// Set the door rotation
-	Owner->SetActorRotation( FRotator( 0.0f , 0.0f , 0.0f ) );
+	if( Owner != nullptr )
+	{
+		// Set the door rotation
+		Owner->SetActorRotation( FRotator( 0.0f , 0.0f , 0.0f ) );
+	}
 }
 
 float UOpenDoor::GetTotalMassOfActorsOnPlate()
