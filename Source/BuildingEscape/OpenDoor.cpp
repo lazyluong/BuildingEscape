@@ -23,9 +23,6 @@ void UOpenDoor::BeginPlay()
 
 	// Find the acting owner
 	Owner = GetOwner();
-
-	// Find the player controller
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -36,8 +33,7 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
 	// Poll the Trigger every frame
-	// If the ActorThatOpens is in the volume
-	if( PressurePlate->IsOverlappingActor( ActorThatOpens ) )
+	if( GetTotalMassOfActorsOnPlate() >= 20.0f )
 	{
 		// Open the door
 		OpenDoor();
@@ -64,4 +60,27 @@ void UOpenDoor::CloseDoor()
 {
 	// Set the door rotation
 	Owner->SetActorRotation( FRotator( 0.0f , 0.0f , 0.0f ) );
+}
+
+float UOpenDoor::GetTotalMassOfActorsOnPlate()
+{
+	float TotalMass = 0.0f;
+	TArray<AActor*> OverlappingActors;
+
+	// Find all the overlapping actors
+	if( PressurePlate != nullptr )
+	{
+		PressurePlate->GetOverlappingActors( OUT OverlappingActors );
+	}
+
+	// Iterate through the actors and accumulating their mass
+	for( auto &Actor : OverlappingActors )
+	{
+		if( Actor->IsA<APawn>() == false )
+		{
+			TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		}
+	}
+
+	return TotalMass;
 }

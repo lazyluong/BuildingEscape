@@ -28,7 +28,9 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG( LogTemp , Warning , TEXT( "Grabber Component Initiated" ) );
+	UE_LOG( LogTemp , Warning , 
+		TEXT( "%s's Grabber Component Initiated." ) ,
+		*GetOwner()->GetName() );
 
 	/// Look for attached Pyhsics Handle Component
 	FindPhysicsHandleComponent();
@@ -44,7 +46,7 @@ void UGrabber::TickComponent( float DeltaTime , ELevelTick TickType , FActorComp
 	Super::TickComponent( DeltaTime , TickType , ThisTickFunction );
 
 	// If the phsyics handle is attached
-	if( PhysicsHandle->GrabbedComponent )
+	if( PhysicsHandle->GrabbedComponent != nullptr )
 	{
 		// Move the object that we're holding
 		PhysicsHandle->SetTargetLocation( GetReachLineEnd() );
@@ -59,22 +61,28 @@ void UGrabber::TickComponent( float DeltaTime , ELevelTick TickType , FActorComp
 void UGrabber::FindPhysicsHandleComponent()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if( PhysicsHandle == nullptr )
+	if( PhysicsHandle != nullptr )
 	{
-		UE_LOG( LogTemp , Warning , TEXT( "%s'Physics Handle Component found." ) , *GetOwner()->GetName() );
+		UE_LOG( LogTemp , Warning , 
+			TEXT( "%s's Physics Handle Component found." ) , 
+			*GetOwner()->GetName() );
 	}
 	else
 	{
-		UE_LOG( LogTemp , Error , TEXT( "%s's is missing input component." ) , *GetOwner()->GetName() );
+		UE_LOG( LogTemp , Error , 
+			TEXT( "%s's is missing input component." ) , 
+			*GetOwner()->GetName() );
 	}
 }
 
 void UGrabber::SetupInputComponent()
 {
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
-	if( InputComponent )
+	if( InputComponent != nullptr )
 	{
-		UE_LOG( LogTemp , Warning , TEXT( "%s'Input Component found." ) , *GetOwner()->GetName() );
+		UE_LOG( LogTemp , Warning , 
+			TEXT( "%s's Input Component found." ) , 
+			*GetOwner()->GetName() );
 
 		/// Bind the input axis
 		InputComponent->BindAction( "Grab" , IE_Pressed , this , &UGrabber::Grab );
@@ -82,7 +90,9 @@ void UGrabber::SetupInputComponent()
 	}
 	else
 	{
-		UE_LOG( LogTemp , Error , TEXT( "%s's is missing input component." ) , *GetOwner()->GetName() );
+		UE_LOG( LogTemp , Error , 
+			TEXT( "%s's is missing input component." ) , 
+			*GetOwner()->GetName() );
 	}
 }
 
