@@ -43,23 +43,11 @@ void UGrabber::TickComponent( float DeltaTime , ELevelTick TickType , FActorComp
 {
 	Super::TickComponent( DeltaTime , TickType , ThisTickFunction );
 
-	/// Get the player view point
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint
-	(
-		OUT PlayerViewPointLocation ,
-		OUT PlayerViewPointRotation
-	);
-
-	FVector LineTraceEnd = PlayerViewPointLocation +
-		PlayerViewPointRotation.Vector() * Reach;
-
 	// If the phsyics handle is attached
 	if( PhysicsHandle->GrabbedComponent )
 	{
 		// Move the object that we're holding
-		PhysicsHandle->SetTargetLocation( LineTraceEnd );
+		PhysicsHandle->SetTargetLocation( GetReachLineEnd() );
 	}
 }
 
@@ -71,7 +59,7 @@ void UGrabber::TickComponent( float DeltaTime , ELevelTick TickType , FActorComp
 void UGrabber::FindPhysicsHandleComponent()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if( PhysicsHandle )
+	if( PhysicsHandle == nullptr )
 	{
 		UE_LOG( LogTemp , Warning , TEXT( "%s'Physics Handle Component found." ) , *GetOwner()->GetName() );
 	}
@@ -100,6 +88,23 @@ void UGrabber::SetupInputComponent()
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 {
+	/// Setup query parameters
+	FCollisionQueryParams TraceParameters( FName( TEXT( "" ) ) , false , GetOwner() );
+
+	/// Line-trace (A.K.A. Ray-cast) out to reach distance
+	FHitResult HitResult;
+	GetWorld()->LineTraceSingleByObjectType
+	(
+		OUT HitResult , GetReachLineStart() , GetReachLineEnd() ,
+		FCollisionObjectQueryParams( ECollisionChannel::ECC_PhysicsBody ) ,
+		TraceParameters
+	);
+
+	return HitResult;
+}
+
+FVector UGrabber::GetReachLineStart()
+{
 	/// Get the player view point
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
@@ -109,34 +114,21 @@ const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 		OUT PlayerViewPointRotation
 	);
 
-	FVector LineTraceEnd = PlayerViewPointLocation +
-		PlayerViewPointRotation.Vector() * Reach;
+	return PlayerViewPointLocation;
+}
 
-	// Draw a red trace in the world to visualize
-	DrawDebugLine( GetWorld() ,
-		PlayerViewPointLocation , LineTraceEnd ,
-		FColor::Red , false , 0.0f , 0 , 10.0f );
-
-	/// Setup query parameters
-	FCollisionQueryParams TraceParameters( FName( TEXT( "" ) ) , false , GetOwner() );
-
-	/// Line-trace (A.K.A. Ray-cast) out to reach distance
-	FHitResult Hit;
-	GetWorld()->LineTraceSingleByObjectType
+FVector UGrabber::GetReachLineEnd()
+{
+	/// Get the player view point
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint
 	(
-		OUT Hit , PlayerViewPointLocation , LineTraceEnd ,
-		FCollisionObjectQueryParams( ECollisionChannel::ECC_PhysicsBody ) ,
-		TraceParameters
+		OUT PlayerViewPointLocation ,
+		OUT PlayerViewPointRotation
 	);
 
-	/// See what we hit
-	AActor* ActorHit = Hit.GetActor();
-	if( ActorHit )
-	{
-		UE_LOG( LogTemp , Warning , TEXT( "Line Tracing is hitting %s." ) , *ActorHit->GetName() );
-	}
-
-	return Hit;
+	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
 }
 
 
@@ -146,8 +138,6 @@ const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 
 void UGrabber::Grab()
 {
-	UE_LOG( LogTemp , Warning , TEXT( "%s is performing a Grab Action." ) , *GetOwner()->GetName() );
-
 	/// LINE TRACE and see if we reach any actors with physics body collision channel set
 	auto HitResult = GetFirstPhysicsBodyInReach();
 	auto ComponentToGrab = HitResult.GetComponent();
@@ -156,11 +146,10 @@ void UGrabber::Grab()
 	/// If we hit something then attach a physics handle
 	if( ActorHit )
 	{
-		// TODO: Attach physics handle
 		PhysicsHandle->GrabComponentAtLocationWithRotation
 		(
 			ComponentToGrab ,
-			NAME_None ,
+			NAME_None , // No bones needed
 			ComponentToGrab->GetOwner()->GetActorLocation() ,
 			ComponentToGrab->GetOwner()->GetActorRotation()
 		);
@@ -169,9 +158,6 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG( LogTemp , Warning , TEXT( "%s is performing a Release Action." ) , *GetOwner()->GetName() );
-	
 	// Release physics handle
 	PhysicsHandle->ReleaseComponent();
 }
-
